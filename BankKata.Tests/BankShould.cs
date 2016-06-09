@@ -18,11 +18,20 @@ namespace BankKata.Tests
             console.Setup(c => c.PrintLine(It.IsAny<string>()))
                 .Callback<string>(r => printedLines.Add(r));
 
-            var mockedRepo  = new Mock<TransactionRepository>();
-            var account = new Account(console.Object, mockedRepo.Object);
+            var dateProvider = new Mock<IDateProvider>();
+            var account = new Account(
+                console.Object, 
+                new TransactionRepository(dateProvider.Object));
+
+            dateProvider.Setup(dp => dp.Now())
+                .Returns("10/01/2012");
             account.Deposit(1000);
+            dateProvider.Setup(dp => dp.Now())
+                .Returns("13/01/2012");
             account.Deposit(2000);
-            account.Withdraw(2000);
+            dateProvider.Setup(dp => dp.Now())
+                .Returns("14/01/2012");
+            account.Withdraw(500);
 
             account.Print();
 

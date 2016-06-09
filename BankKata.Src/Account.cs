@@ -1,14 +1,16 @@
+using System.Linq;
+
 namespace BankKata.Src
 {
     public class Account
     {
-        private IConsole _console;
-        private TransactionRepository _transactionRepository;
+        private readonly IConsole _console;
+        private readonly ITransactionRepository _transactionRepository;
 
-        public Account(IConsole console, TransactionRepository transactionRepository)
+        public Account(IConsole console, ITransactionRepository transactionRepository)
         {
-            this._console = console;
-            this._transactionRepository = transactionRepository;
+            _console = console;
+            _transactionRepository = transactionRepository;
         }
 
         public void Deposit(int amount)
@@ -18,12 +20,21 @@ namespace BankKata.Src
 
         public void Withdraw(int amount)
         {
-            throw new System.NotImplementedException();
+            _transactionRepository.RecordWithdrawal(amount);
         }
 
         public void Print()
         {
-            throw new System.NotImplementedException();
+            _console.PrintLine("date || credit || debit || balance");
+            var transactions = _transactionRepository.GetTransactions();
+            transactions.Reverse();
+
+            for (var i = 0; i <transactions.Count; i++)
+            {
+                var transaction = transactions[i];
+                var solde = transactions.Skip(i).Sum(x => x.GetAmount());
+                _console.PrintLine(transaction + $"|| {solde.ToString("0.00")}");
+            }
         }
     }
 }
